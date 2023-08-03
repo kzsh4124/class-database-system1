@@ -83,7 +83,6 @@ def register_post():
 
     # Check if username already exists
     existing_user = db.users.find_one({'name': username})
-
     if existing_user is None:
         hash_pass = generate_password_hash(password, method='sha256')  
         user_data = {
@@ -100,7 +99,7 @@ def register_post():
         return redirect(url_for('dashboard'))
     else:
         #Provide error message for duplicate username
-        return render_template('register_err.html', msg='The provided username already exists.')
+        return render_template('register_user.html', msg='ユーザ名がすでに存在します。別の名前を入力してください。')
 
 @app.route('/login', methods=['GET'])
 def login():
