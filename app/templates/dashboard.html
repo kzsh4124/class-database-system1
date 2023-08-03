@@ -2,74 +2,104 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>分散図書システム - ダッシュボード</title>
+    <title>分散図書館システム - ダッシュボード</title>
+    <!-- Bootstrap CSS for responsive design -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-       body {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin: 0;
-          padding: 0;
-          font-family: Arial, sans-serif;
-       }
-       header {
-          background-color: #f8f8f8;
-          width: 100%;
-          padding: 20px 0;
-          text-align: center;
-       }
-       nav a {
-          margin: 0 10px;
-          text-decoration: none;
-          color: #333;
-       }
-       main {
-          display: flex;
-          justify-content: space-between;
-          margin: 20px 0;
-          padding: 0 50px;
-          width: 100%;
-       }
-       main h2, ul {
-           margin: 0;
-           padding-bottom: 20px;
-       }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
     </style>
 </head>
 <body>
-<header>
-    <h1>分散図書システム</h1>
-    <nav>
-        <a href="/search">書籍検索</a> | 
-        <a href="/user/{{ user_id }}">マイページ</a> | 
-        <a href="/book/register">新規書籍登録</a> | 
-        <a href="/user/setting">設定</a>
-    </nav>
-</header>
-<main>
-    <div>
-        <h2>本棚</h2>
-        <ul>
-        {% for book in books %}
-            <li><a href="/book/{{ book._id }}">{{ book.name }}</a> | <a href="/book/{{ book._id }}/update">状態更新</a></li>
-        {% endfor %}
-        </ul>
-    </div>
-    <div>
-        <h2>貸出リクエスト一覧</h2>
-        <ul>
-        {% for request in requests %}
-            <li>{{ request.book_id }} <button onclick="location.href='/request/{{ request._id }}/respond/approve'">承認</button><button onclick="location.href='/request/{{ request._id }}/respond/reject'">拒否</button></li> 
-        {% endfor %}
-        </ul>
-
-        <h2>貸出中の書籍一覧</h2>
-        <ul>
-        {% for lending in lendings %}
-            <li><a href="/book/{{ lending.book_id }}">{{ lending.book_name }}</a> | 借りている人：{{ lending.borrower_name }}</li>
-        {% endfor %}
-        </ul>
-    </div>
-</main>
+<div class="container">
+    <header>
+        <h1 class="text-center mb-5">分散図書館システム</h1>
+        <nav class="mb-5 d-flex justify-content-center">
+            <a href="/search" class="btn btn-outline-primary mr-2">書籍検索</a>
+            <a href="/user/{{user_id}}" class="btn btn-outline-primary mr-2">マイページ</a>
+            <a href="/book/register" class="btn btn-outline-primary mr-2">新規書籍登録</a>
+            <a href="/user/setting" class="btn btn-outline-primary">設定</a>
+        </nav>
+    </header>
+    <main>
+        <div class="row">
+            <div class="col-md-7 mb-5">
+                <h3>本棚</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th width="30%">書籍名</th>
+                            <th width="25%">著者名</th>
+                            <th width="25%">出版社</th>
+                            <th width="10%">出版日</th>
+                            <th width="10%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for book in books %}
+                        <tr>
+                            <td><a href="/book/{{ book._id }}">{{ book.name }}</a></td>
+                            <td>{{ book.author }}</td>
+                            <td>{{ book.publisher }}</td>
+                            <td>{{ book.publish_date }}</td>
+                            <td><a href="/book/{{ book._id }}/update" class="btn btn-sm btn-outline-secondary">状態更新</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-5">
+                <div class="mb-5">
+                    <h3>貸出リクエスト一覧</h3>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="45%">書籍名</th>
+                                <th width="35%">リクエスト者</th>
+                                <th width="20%"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for request in requests %}
+                            <tr>
+                                <td>{{ request.book_name }}</td>
+                                <td>{{ request.user_name }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button onclick="location.href='/request/{{ request._id }}/respond/approve'" class="btn btn-sm btn-outline-success">承認</button>
+                                        <button onclick="location.href='/request/{{ request._id }}/respond/reject'" class="btn btn-sm btn-outline-danger">拒否</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h3>貸出中書籍一覧</h3>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="60%">書籍名</th>
+                                <th>借りている人</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for lending in lendings %}
+                            <tr>
+                                <td><a href="/book/{{ lending.book_id }}">{{ lending.book_name }}</a></td>
+                                <td>{{ lending.borrower_name }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
 </body>
 </html>
