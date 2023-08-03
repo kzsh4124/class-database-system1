@@ -4,6 +4,8 @@ import pymongo
 from dataclasses import dataclass
 from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
+import requests
+import xmltodict
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = secrets.token_hex(16)
@@ -120,7 +122,7 @@ def login_post():
         return render_template('login.html', error="Invalid username or password.")
 
 
-
+# 検索システム
 @app.route("/search", methods=["GET"])
 def search():
     return render_template("search.html")
@@ -177,8 +179,66 @@ def result():
         return jsonify({"message": "target must be 'user' or 'book'."})
     
 
+# 登録システム
+@app.route("/book/register", methods=["GET"])
+def get_register():
+    isbn = request.args.get("isbn")
+    book = None
 
+    if isbn:
+        url = f"http://iss.ndl.go.jp/api/sru?operation=searchRetrieve&query=isbn={isbn}"
+        response = requests.get(url)
+        xml_data = xmltodict.parse(response.content)
+        records = xml_data["searchRetrieveResponse"]["records"]
 
+        if records is not None:
+            record_data = records["record"][0]["recordData"]["srw_dc:dc"]
+
+            book = {
+                "isbn": isbn,
+                "name": record_data.get("dc:title"),
+                "author": record_data.get("dc:creator"),
+                "publish_date": record_data.get("dc:date"),
+                "publisher": record_data.get("dc:publisher"),
+            }
+
+    if is_logged_in():
+        return render_template("register.html", book=book)
+    else:
+        return redirect("/login")
+
+@app.route("/book/register", methods=["POST"])
+def post_register():
+    if not is_logged_in():
+        return redirect("/login")
+
+    # Get form data
+    isbn = request.form.get("isbn")
+    name = request.form.get("name")
+    author = request.form.get("author")
+    publish_date = request.form.get("publish_date")
+    publisher = request.form.get("publisher")
+
+    # Create a new book entry
+    new_book = {
+        "isbn": isbn,
+        "name": name,
+        "author": author,
+        "publish_date": publish_date,
+        "publisher": publisher,
+        "user_id": session["user_id"],
+        "status": "inStock",
+        "lend_to": None
+    }
+
+    # Get MongoDB client
+    db = create_mongodb_connection()
+
+    # Insert the new book to the collection
+    db.books.insert_one(new_book)
+
+    # Redirect to the user's dashboard
+    return redirect("/")
 
 if __name__ == "__main__":
     app.run(debug=False, host='0.0.0.0', port='11047')
