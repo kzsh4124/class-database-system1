@@ -41,7 +41,7 @@ def is_logged_in():
     return 'user_id' in session
 
 def get_user_from_id(id, db):
-    user_data = db.users.find_one({"_id": id})
+    user_data = db.users.find_one({"_id": ObjectId(id)})
     
     if user_data is None:
         return None
