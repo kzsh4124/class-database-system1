@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>分散図書館システム - 検索</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1 class="text-center mb-5">分散図書館システム</h1>
+        <nav class="mb-5 d-flex justify-content-center">
+            <a href="/" class="btn btn-outline-primary mr-2">マイページ</a>
+            <a href="/book/register" class="btn btn-outline-primary mr-2">新規書籍登録</a>
+            <a href="/user/setting" class="btn btn-outline-primary">設定</a>
+        </nav>
+    </header>
+    <main>
+        <h2 class="text-center mb-4">検索</h2>
+        <form action="/result" method="post" class="form-signin" id="searchform">
+            <div class="form-group mb-3">
+                <label for="target">対象:</label>
+                <select class="custom-select" id="target" name="target" required>
+                    <option value="user">ユーザー名</option>
+                    <option value="book">書籍</option>
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="name">名前:</label>
+                <input type="text" id="name" name="name" class="form-control">
+            </div>
+            <div class="form-group mb-3" id="isbnbox">
+                <label for="isbn">ISBN:</label>
+                <input type="text" id="isbn" name="isbn" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">検索</button>
+        </form>
+    </main>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+    var target = $("#target").val();
+    if (target == "user") {
+        $("#isbnbox").hide();
+    }
+
+    $("#target").change(function() {
+        if ($(this).val() == "user") {
+            $("#isbnbox").hide();
+        } else {
+            $("#isbnbox").show();
+        }
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>分散図書館システム - ユーザー検索結果</title>
+    <!-- Bootstrap CSS for responsive design -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+         .container {
+             max-width: 960px;
+             margin: 0 auto;
+             padding: 40px 0;
+        }
+        .result-section {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1 class="text-center mb-5">分散図書館システム</h1>
+        <nav class="mb-5 d-flex justify-content-center">
+            <a href="/search" class="btn btn-outline-primary mr-2">書籍検索</a>
+            <a href="/user/{{user_id}}" class="btn btn-outline-primary mr-2">マイページ</a>
+            <a href="/book/register" class="btn btn-outline-primary mr-2">新規書籍登録</a>
+            <a href="/user/setting" class="btn btn-outline-primary">設定</a>
+        </nav>
+    </header>
+    <main>
+        <div class="col-7 mx-auto">
+            <h3>ユーザー検索結果</h3>
+            <hr>
+            <div class="result-section">
+                {% for user in users %}
+                    <p><a href="/user/{{ user._id }}">{{ user.name }}</a></p>
+                {% endfor %}
+            </div>
+            <div class="text-center">
+                <a href="/search" class="btn btn-secondary mt-3">検索に戻る</a>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
