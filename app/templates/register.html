@@ -12,6 +12,21 @@
             padding: 40px 0;
         }
     </style>
+    <script type="text/javascript">
+        // "本の情報取得" ボタンをクリックした時の動作
+        function getInfo() {
+            // nameフィールドのrequired属性を削除
+            document.getElementById('name').removeAttribute('required');
+            return true;
+        }
+
+        // "登録" ボタンをクリックした時の動作
+        function submitForm() {
+            // nameフィールドにrequired属性を追加
+            document.getElementById('name').setAttribute('required', '');
+            return true;
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -26,12 +41,12 @@
         </header>
         <main>
             <h2>新規書籍登録</h2>
-            <form action="/book/register" method="POST">
+            <form action="/book/register" method="POST" onsubmit="return submitForm();">
                 <div class="form-group">
                     <label for="isbn">ISBN</label>
                     <div class="d-flex">
                         <input type="text" id="isbn" name="isbn" class="form-control mr-2" value="{{ book.isbn if book is defined else '' }}" required>
-                        <button type="submit" formaction="/book/register?isbn=" formmethod="get" class="btn btn-secondary">本の情報取得</button>
+                        <button type="submit" formaction="/book/register?isbn=" formmethod="get" class="btn btn-secondary" onclick="return getInfo();">本の情報取得</button>
                     </div>
                 </div>
                 <div class="form-group">
