@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>分散図書館システム - 書籍状態更新</title>
+    <!-- Bootstrap CSS for responsive design -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1 class="text-center mb-5">分散図書館システム</h1>
+        <nav class="mb-5 d-flex justify-content-center">
+            <a href="/search" class="btn btn-outline-primary mr-2">書籍検索</a>
+            <a href="/user/{{user_id}}" class="btn btn-outline-primary mr-2">マイページ</a>
+            <a href="/book/register" class="btn btn-outline-primary mr-2">新規書籍登録</a>
+            <a href="/user/setting" class="btn btn-outline-primary">設定</a>
+        </nav>
+    </header>
+    <main>
+        <div class="row">
+            <div class="col-12 mb-5">
+                <h2 class="mb-3">書籍状態更新</h2>
+                <form action="{{ url_for('update', book_id=book._id) }}" method="post">
+                    <div class="form-group">
+                        <label for="status">状態</label>
+                        <select id="status" name="status" class="form-control">
+                            <option value="reading" {% if book.status == "reading" %}selected{% endif %}>読書中</option>
+                            <option value="lending" {% if book.status == "lending" %}selected{% endif %}>貸出中</option>
+                            <option value="inStock" {% if book.status == "inStock" %}selected{% endif %}>所蔵</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="isbn">ISBN</label>
+                        <input id="isbn" name="isbn" type="text" class="form-control" value="{{ book.isbn }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="name">書籍名</label>
+                        <input id="name" name="name" type="text" class="form-control" value="{{ book.name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="author">著者</label>
+                        <input id="author" name="author" type="text" class="form-control" value="{{ book.author }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="publish_date">出版日</label>
+                        <input id="publish_date" name="publish_date" type="date" class="form-control" value="{{ book.publish_date }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="publisher">出版社</label>
+                        <input id="publisher" name="publisher" type="text" class="form-control" value="{{ book.publisher }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">状態更新</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
+```
+
+このHTMLテンプレートでは、Jinja2のテンプレート構文を利用して書籍の状態更新画面を提供しています。ユーザーは各フォームを利用して書籍情報を更新した後、'状態更新'ボタンをクリックして更新内容をサーバに送信します。
