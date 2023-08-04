@@ -49,7 +49,7 @@ def get_user_from_id(id, db):
         return None
 
     return User(
-        _id=user_data['_id'],
+        _id=str(user_data['_id']),
         name=user_data['name'],
         password=user_data['password'],
         open=user_data['open'],
@@ -65,6 +65,7 @@ def index():
         books = db.books.find({'user_id': user._id})
         requests = db.requests.find({'owner_user_id': user._id})
         lending = db.books.find({'status': 'lending', 'user_id': user._id})
+        print(session['user_id'],user._id, type(session['user_id']), type(user._id))
         return render_template('dashboard.html', books=books, requests=requests, lending=lending)
     else:
         return render_template('index.html')
@@ -192,7 +193,9 @@ def get_register():
         records = xml_data["searchRetrieveResponse"]["records"]
 
         if records is not None:
-            record_data = records["record"][0]["recordData"]["srw_dc:dc"]
+            # 本当は複数の候補があったら選ばせるべき
+            record_data_xml = records["record"][0]["recordData"]
+            record_data = xmltodict.parse(record_data_xml)["srw_dc:dc"]
 
             book = {
                 "isbn": isbn,

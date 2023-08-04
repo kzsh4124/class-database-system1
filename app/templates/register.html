@@ -45,25 +45,25 @@
                 <div class="form-group">
                     <label for="isbn">ISBN</label>
                     <div class="d-flex">
-                        <input type="text" id="isbn" name="isbn" class="form-control mr-2" value="{{ book.isbn if book is defined else '' }}" required>
+                        <input type="text" id="isbn" name="isbn" class="form-control mr-2" value="{{ book.isbn if book.isbn else '' }}" required>
                         <button type="submit" formaction="/book/register?isbn=" formmethod="get" class="btn btn-secondary" onclick="return getInfo();">本の情報取得</button>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="name">書籍名</label>
-                    <input type="text" id="name" name="name" class="form-control" value="{{ book.name if book is defined else '' }}" required>
+                    <input type="text" id="name" name="name" class="form-control" value="{{ book.name if book.author  else '' }}" required>
                 </div>
                 <div class="form-group">
                     <label for="author">著者名</label>
-                    <input type="text" id="author" name="author" class="form-control" value="{{ book.author if book is defined else '' }}">
+                    <input type="text" id="author" name="author" class="form-control" value="{{ book.author if book.author else '' }}">
                 </div>
                 <div class="form-group">
                     <label for="publish_date">出版日</label>
-                    <input type="text" id="publish_date" name="publish_date" class="form-control" value="{{ book.publish_date if book is defined else '' }}">
+                    <input type="text" id="publish_date" name="publish_date" class="form-control" value="{{ book.publish_date if book.publish_date else '' }}">
                 </div>
                 <div class="form-group">
                     <label for="publisher">出版社</label>
-                    <input type="text" id="publisher" name="publisher" class="form-control" value="{{ book.publisher if book is defined else '' }}">
+                    <input type="text" id="publisher" name="publisher" class="form-control" value="{{ book.publisher if book.publisher else '' }}">
                 </div>
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">登録</button>
