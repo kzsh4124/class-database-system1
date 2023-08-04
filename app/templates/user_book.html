@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>分散図書館システム - {{ user.name }}</title>
+    <!-- Bootstrap CSS for responsive design -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1 class="text-center my-5">{{ user.name }}</h1>
+    </header>
+    <main>
+        <h2>書籍リスト</h2>
+        <form action="/user/{{ user._id }}" method="get">
+            <div class="form-group">
+                <label for="book_name">書籍名で検索</label>
+                <input type="text" class="form-control" id="book_name" name="book_name">
+            </div>
+            <button type="submit" class="btn btn-primary">検索</button>
+        </form>
+        <div class="my-5">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>書籍名</th>
+                        <th>著者</th>
+                        <th>出版日</th>
+                        {% if user._id == session['user_id'] %}
+                            <th>状態更新</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                        <tr>
+                            <td><a href="/book/{{ book._id }}">{{ book.name }}</a></td>
+                            <td>{{ book.author }}</td>
+                            <td>{{ book.publish_date }}</td>
+                            {% if user._id == session['user_id'] %}
+                                <td>
+                                    <a href="/book/{{ book._id }}/update" class="btn btn-outline-primary">更新</a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

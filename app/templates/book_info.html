@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ book.name }} - 分散図書館システム</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1 class="text-center mb-5">分散図書館システム</h1>
+        <nav class="mb-5 d-flex justify-content-center">
+            <a href="/search" class="btn btn-outline-primary mr-2">書籍検索</a>
+            <a href="/user/{{user_id}}" class="btn btn-outline-primary mr-2">マイページ</a>
+            <a href="/book/register" class="btn btn-outline-primary mr-2">新規書籍登録</a>
+            <a href="/user/setting" class="btn btn-outline-primary">設定</a>
+        </nav>
+    </header>
+    <main>
+        <h2>{{ book.name }}</h2>
+        <table class="table table-hover">
+            <tbody>
+                <tr>
+                    <th>ISBN</th>
+                    <td>{{ book.isbn }}</td>
+                </tr>
+                <tr>
+                    <th>著者名</th>
+                    <td>{{ book.author }}</td>
+                </tr>
+                <tr>
+                    <th>出版日</th>
+                    <td>{{ book.publish_date }}</td>
+                </tr>
+                <tr>
+                    <th>出版社</th>
+                    <td>{{ book.publisher }}</td>
+                </tr>
+                <tr>
+                    <th>所有者</th>
+                    <td>{{ book.user_name }}</td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>{{ book.status }}</td>
+                </tr>
+            </tbody>
+        </table>
+        {% if user_id != book.user_id and book.status == 'inStock' %}
+            <a href="/book/{{ book._id }}/request" class="btn btn-primary">貸出要求をする</a>
+        {% endif %}
+    </main>
+</div>
+</body>
+</html>

@@ -6,6 +6,7 @@ from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
 import xmltodict
+from typing import Optional
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = secrets.token_hex(16)
@@ -21,15 +22,16 @@ class User:
 
 @dataclass
 class Book:
-    _id: str
-    isbn: str
-    name: str
-    author: str
-    publish_date: str
-    publisher: str
-    user_id: str
-    status: str  # "reading"|"lending"|"inStock"
-    lend_to: str  # id(user_id) | None
+    _id: Optional[str] = None
+    isbn: Optional[str] = None
+    name: Optional[str] = None
+    author: Optional[str] = None
+    publish_date: Optional[str] = None
+    publisher: Optional[str] = None
+    user_id: Optional[str] = None
+    status: Optional[str] = None  # 'inStock' or 'lending' or 'reading'
+    lend_to: Optional[str] = None # User_id of the user who is borrowing the book
+
 
 # Utility functions
 def create_mongodb_connection():
@@ -179,6 +181,53 @@ def result():
     else:
         return jsonify({"message": "target must be 'user' or 'book'."})
     
+# ユーザ情報
+@app.route('/user/<user_id>', methods=['GET'])
+def user_books(user_id):
+    # Check user's access right
+    if not ObjectId.is_valid(user_id):
+        login_user_id = session['user_id'] if session.get('user_id') else None
+        return render_template('not_found.html', user_id=login_user_id)
+
+    # Connect to the MongoDB and get the database instance
+    db = create_mongodb_connection()
+
+    # Get user's information
+    user = get_user_from_id(user_id, db)
+    if user is None:
+        login_user_id = session['user_id'] if session.get('user_id') else None
+        return render_template('not_found.html', user_id=login_user_id)
+
+    # If not logged-in user and user.open is False, show error
+    if not user.open and (not 'user_id' in session or session['user_id'] != user_id):
+        login_user_id = session['user_id'] if session.get('user_id') else None
+        return render_template('not_found.html', user_id=login_user_id)
+
+    book_name = request.args.get('book_name', None)
+    query = {'user_id': ObjectId(user_id)}
+    if book_name:
+        query['name'] = book_name
+    books = list(db.books.find(query))
+
+    return render_template('user_books.html', user=user, books=books)
+
+# 本の情報
+@app.route('/book/<book_id>', methods=['GET'])
+def book_info_handler(book_id):
+
+    db = create_mongodb_connection()
+
+    book_data = db.books.find_one({"_id": ObjectId(book_id)})
+
+    if book_data is None:
+        user_id = session['user_id'] if session.get('user_id') else None
+        return render_template('not_found.html', user_id=user_id)
+
+    owner_data = db.users.find_one({"_id": ObjectId(book_data['user_id'])})
+    if owner_data:
+        book_data['owner_name'] = owner_data['name']
+
+    return render_template('book_info.html', book=book_data)
 
 # 登録システム
 @app.route("/book/register", methods=["GET"])
@@ -215,14 +264,12 @@ def post_register():
     if not is_logged_in():
         return redirect("/login")
 
-    # Get form data
     isbn = request.form.get("isbn")
     name = request.form.get("name")
     author = request.form.get("author")
     publish_date = request.form.get("publish_date")
     publisher = request.form.get("publisher")
 
-    # Create a new book entry
     new_book = {
         "isbn": isbn,
         "name": name,
@@ -233,15 +280,71 @@ def post_register():
         "status": "inStock",
         "lend_to": None
     }
-
-    # Get MongoDB client
+    
     db = create_mongodb_connection()
-
-    # Insert the new book to the collection
     db.books.insert_one(new_book)
-
-    # Redirect to the user's dashboard
     return redirect("/")
 
+# 本の更新
+# TODO: Noneが出ないようにする必要あるかも
+# TODO: /not_foundはないので修正
+@app.route('/book/<book_id>/update', methods=['GET'])
+def update(book_id):
+    if not is_logged_in():
+        return redirect('/login')
+    
+    db = create_mongodb_connection()
+    user_id = session.get('user_id')
+
+    book = db.books.find_one({"_id": ObjectId(book_id)})
+    
+    if book is None or book['user_id'] != user_id:
+        # Return the not_found.html template directly
+        return render_template('not_found.html', user_id=user_id)
+
+    book_obj = Book(
+        _id=str(book['_id']),
+        isbn=book['isbn'],
+        name=book['name'],
+        author=book['author'],
+        publish_date=book['publish_date'],
+        publisher=book['publisher'],
+        user_id=book['user_id'],
+        status=book['status'],
+        lend_to=book.get('lend_to')
+    )
+    return render_template('update.html', book=book_obj)
+
+# TODO: url for を直す必要があるかも
+@app.route('/book/<book_id>/update', methods=['POST'])
+def post_update(book_id):
+    if not is_logged_in():
+        return redirect('/login')
+    
+    db = create_mongodb_connection()
+    user_id = session.get('user_id')
+
+    book = db.books.find_one({"_id": ObjectId(book_id)})
+    
+    if book is None or book['user_id'] != user_id:
+        return redirect('/not_found')
+
+    status = request.form.get('status', book['status'])
+    isbn = request.form.get('isbn', book['isbn'])
+    name = request.form.get('name', book['name'])
+    author = request.form.get('author', book['author'])
+    publish_date = request.form.get('publish_date', book['publish_date'])
+    publisher = request.form.get('publisher', book['publisher'])
+
+    db.books.update_one({"_id": ObjectId(book_id)}, {"$set": {
+        "status": status, 
+        "isbn": isbn,
+        "name": name,
+        "author": author,
+        "publish_date": publish_date,
+        "publisher": publisher
+    }})
+
+    return redirect(url_for('book_info', book_id=book_id))
 if __name__ == "__main__":
     app.run(debug=False, host='0.0.0.0', port='11047')
