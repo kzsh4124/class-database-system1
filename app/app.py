@@ -68,7 +68,7 @@ def index():
         requests = db.requests.find({'owner_user_id': user._id})
         lending = db.books.find({'status': 'lending', 'user_id': user._id})
         print(session['user_id'],user._id, type(session['user_id']), type(user._id))
-        return render_template('dashboard.html', books=books, requests=requests, lending=lending)
+        return render_template('dashboard.html', books=books, requests=requests, lending=lending, user_id=user._id)
     else:
         return render_template('index.html')
 
@@ -204,7 +204,7 @@ def user_books(user_id):
         return render_template('not_found.html', user_id=login_user_id)
 
     book_name = request.args.get('book_name', None)
-    query = {'user_id': ObjectId(user_id)}
+    query = {'user_id': user_id}
     if book_name:
         query['name'] = book_name
     books = list(db.books.find(query))
@@ -227,7 +227,7 @@ def book_info_handler(book_id):
     if owner_data:
         book_data['owner_name'] = owner_data['name']
 
-    return render_template('book_info.html', book=book_data)
+    return render_template('book_info.html', book=book_data, user_id=session.get('user_id'))
 
 # 登録システム
 @app.route("/book/register", methods=["GET"])
@@ -345,6 +345,38 @@ def post_update(book_id):
         "publisher": publisher
     }})
 
-    return redirect(url_for('book_info', book_id=book_id))
+    return redirect(f'/book/{book_id}')
+
+@app.route('/book/<book_id>/delete', methods=['GET'])
+def delete_book(book_id):
+    # Logged in check
+    if not is_logged_in():
+        return redirect(url_for('login'))
+
+    # db connection
+    db = create_mongodb_connection()
+
+    # Check authorized user
+    book = db.books.find_one({"_id": ObjectId(book_id)})
+    if book is None:
+        return render_template('not_found.html', message="Book not found!")
+
+    if str(book['user_id']) != session['user_id']:
+        return render_template('not_found.html')
+
+    # Delete book
+    db.books.delete_one({"_id": ObjectId(book_id)})
+    
+    return redirect(url_for('index'))
+
+
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
     app.run(debug=False, host='0.0.0.0', port='11047')

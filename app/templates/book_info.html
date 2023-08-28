@@ -18,7 +18,7 @@
         <h1 class="text-center mb-5">分散図書館システム</h1>
         <nav class="mb-5 d-flex justify-content-center">
             <a href="/search" class="btn btn-outline-primary mr-2">書籍検索</a>
-            <a href="/user/{{user_id}}" class="btn btn-outline-primary mr-2">マイページ</a>
+            <a href="/" class="btn btn-outline-primary mr-2">マイページ</a>
             <a href="/book/register" class="btn btn-outline-primary mr-2">新規書籍登録</a>
             <a href="/user/setting" class="btn btn-outline-primary">設定</a>
         </nav>
@@ -55,6 +55,9 @@
         </table>
         {% if user_id != book.user_id and book.status == 'inStock' %}
             <a href="/book/{{ book._id }}/request" class="btn btn-primary">貸出要求をする</a>
+        {% endif %}
+        {% if user_id == book.user_id %}
+            <a href="/book/{{ book._id }}/delete" class="btn btn-danger">この書籍を削除</a>
         {% endif %}
     </main>
 </div>
